@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 import { Car } from '@/types/car' // Import the Car type
@@ -17,8 +17,8 @@ export default function CarDetail() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
 
-  // Define fetchCar outside of useEffect so it can be reused
-  const fetchCar = async () => {
+  // Memoize fetchCar to avoid recreating it on every render
+  const fetchCar = useCallback(async () => {
     const response = await fetch(`/api/cars/${params.id}`)
     if (response.ok) {
       const data = await response.json()
@@ -30,11 +30,11 @@ export default function CarDetail() {
       setDealer(data.car.dealer)
       setLoading(false)
     }
-  }
+  }, [params.id]) // Include `params.id` as a dependency
 
   useEffect(() => {
     fetchCar() // Call fetchCar on component mount
-  }, [params.id]) // dependency on params.id ensures it runs only when the ID changes
+  }, [fetchCar]) // Add `fetchCar` as a dependency
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -107,7 +107,7 @@ export default function CarDetail() {
           <p>Company: {car?.company}</p>
           <p>Dealer: {car?.dealer}</p>
           <div className="grid grid-cols-2 gap-4 my-4">
-            {car?.images.map((image: string, index: number) => (
+            {car?.images?.map((image: string, index: number) => (
               <Image key={index} src={image} alt={`Car image ${index + 1}`} width={300} height={200} className="rounded" />
             ))}
           </div>
