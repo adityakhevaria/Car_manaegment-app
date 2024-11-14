@@ -1,7 +1,6 @@
+// app/api/docs/page.tsx
 import { getApiDocs } from '@/app/lib/swagger'
-import dynamic from 'next/dynamic'
-
-const ReactSwagger = dynamic(() => import('@/app/components/ReactSwagger'), { ssr: false })
+import ReactSwagger from '@/app/components/ReactSwagger'  // Import directly
 
 export default async function ApiDoc() {
   const spec = await getApiDocs()
