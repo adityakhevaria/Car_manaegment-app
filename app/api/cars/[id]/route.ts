@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import {prisma} from "@/app/lib/prisma";
+import { prisma } from "@/app/lib/prisma"
 import { getServerSession } from 'next-auth/next'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -9,7 +9,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: { params: { id: string } }) {
+  const { id } = context.params  // Access the id from context.params
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -17,7 +18,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   const car = await prisma.car.findUnique({
     where: {
-      id: params.id,
+      id: id,  // Use id from context.params
       userId: session.user.id
     }
   })
@@ -29,7 +30,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json({ car })
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, context: { params: { id: string } }) {
+  const { id } = context.params  // Access the id from context.params
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -40,7 +42,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   const car = await prisma.car.findUnique({
     where: {
-      id: params.id,
+      id: id,  // Use id from context.params
       userId: session.user.id
     }
   })
@@ -59,7 +61,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
   const updatedCar = await prisma.car.update({
     where: {
-      id: params.id
+      id: id  // Use id from context.params
     },
     data: {
       title: title || car.title,
@@ -74,7 +76,8 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json({ car: updatedCar })
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, context: { params: { id: string } }) {
+  const { id } = context.params  // Access the id from context.params
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -82,7 +85,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   const car = await prisma.car.findUnique({
     where: {
-      id: params.id,
+      id: id,  // Use id from context.params
       userId: session.user.id
     }
   })
@@ -93,7 +96,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   await prisma.car.delete({
     where: {
-      id: params.id
+      id: id  // Use id from context.params
     }
   })
 
