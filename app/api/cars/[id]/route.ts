@@ -1,16 +1,23 @@
 import { NextResponse } from 'next/server'
-import { prisma } from "@/app/lib/prisma"
+import { prisma } from '@/app/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { v2 as cloudinary } from 'cloudinary'
 
+// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-export async function GET(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params  // Access the id from context.params
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const id = url.pathname.split('/').pop()  // Extract the `id` from the URL path
+
+  if (!id) {
+    return NextResponse.json({ error: 'Car ID is missing' }, { status: 400 })
+  }
+
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -18,9 +25,9 @@ export async function GET(req: Request, context: { params: { id: string } }) {
 
   const car = await prisma.car.findUnique({
     where: {
-      id: id,  // Use id from context.params
-      userId: session.user.id
-    }
+      id: id,
+      userId: session.user.id,
+    },
   })
 
   if (!car) {
@@ -30,8 +37,14 @@ export async function GET(req: Request, context: { params: { id: string } }) {
   return NextResponse.json({ car })
 }
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params  // Access the id from context.params
+export async function PUT(req: Request) {
+  const url = new URL(req.url)
+  const id = url.pathname.split('/').pop()  // Extract the `id` from the URL path
+
+  if (!id) {
+    return NextResponse.json({ error: 'Car ID is missing' }, { status: 400 })
+  }
+
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -42,9 +55,9 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 
   const car = await prisma.car.findUnique({
     where: {
-      id: id,  // Use id from context.params
-      userId: session.user.id
-    }
+      id: id,
+      userId: session.user.id,
+    },
   })
 
   if (!car) {
@@ -56,12 +69,12 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
   if (images && images.length > 0) {
     uploadedImages = await Promise.all(
       images.map((image: string) => cloudinary.uploader.upload(image))
-    ).then(results => results.map(result => result.secure_url))
+    ).then((results) => results.map((result) => result.secure_url))
   }
 
   const updatedCar = await prisma.car.update({
     where: {
-      id: id  // Use id from context.params
+      id: id,
     },
     data: {
       title: title || car.title,
@@ -69,15 +82,21 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       images: uploadedImages,
       carType: carType || car.carType,
       company: company || car.company,
-      dealer: dealer || car.dealer
-    }
+      dealer: dealer || car.dealer,
+    },
   })
 
   return NextResponse.json({ car: updatedCar })
 }
 
-export async function DELETE(req: Request, context: { params: { id: string } }) {
-  const { id } = context.params  // Access the id from context.params
+export async function DELETE(req: Request) {
+  const url = new URL(req.url)
+  const id = url.pathname.split('/').pop()  // Extract the `id` from the URL path
+
+  if (!id) {
+    return NextResponse.json({ error: 'Car ID is missing' }, { status: 400 })
+  }
+
   const session = await getServerSession()
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
@@ -85,9 +104,9 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
 
   const car = await prisma.car.findUnique({
     where: {
-      id: id,  // Use id from context.params
-      userId: session.user.id
-    }
+      id: id,
+      userId: session.user.id,
+    },
   })
 
   if (!car) {
@@ -96,8 +115,8 @@ export async function DELETE(req: Request, context: { params: { id: string } }) 
 
   await prisma.car.delete({
     where: {
-      id: id  // Use id from context.params
-    }
+      id: id,
+    },
   })
 
   return NextResponse.json({ message: 'Car deleted successfully' })
