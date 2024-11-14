@@ -19,7 +19,7 @@ interface CarData {
   dealer: string
 }
 
-// Update GET and POST handlers
+// POST handler to create a new car
 export async function POST(req: Request) {
   const session = await getServerSession()  // No need for authOptions here
   if (!session || !session.user?.id) {
@@ -30,18 +30,22 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { title, description, images, carType, company, dealer }: CarData = body
 
+    // Validate required fields
     if (!title || !description || !images || !carType || !company || !dealer) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Validate image count (max 10)
     if (images.length > 10) {
       return NextResponse.json({ error: 'Maximum 10 images allowed' }, { status: 400 })
     }
 
+    // Upload images to Cloudinary
     const uploadedImages = await Promise.all(
       images.map((image: string) => cloudinary.uploader.upload(image))
     )
 
+    // Create car record in Prisma
     const car = await prisma.car.create({
       data: {
         title,
@@ -64,6 +68,7 @@ export async function POST(req: Request) {
   }
 }
 
+// GET handler to fetch cars with search and pagination
 export async function GET(req: Request) {
   const session = await getServerSession()  // Use getServerSession directly without importing authOptions
   if (!session || !session.user?.id) {
@@ -76,6 +81,7 @@ export async function GET(req: Request) {
   const limit = parseInt(searchParams.get('limit') || '10')
 
   try {
+    // Construct where filter with search criteria and pagination
     const where = {
       userId: session.user.id,
       ...(search ? {
@@ -89,6 +95,7 @@ export async function GET(req: Request) {
       } : {}),
     }
 
+    // Fetch cars with pagination
     const [cars, totalCount] = await Promise.all([
       prisma.car.findMany({
         where,
