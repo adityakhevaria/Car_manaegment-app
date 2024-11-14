@@ -43,8 +43,9 @@ export default function NewCar() {
         setError(errorMessage)
       }
     } catch (error) {
-      setError('An unexpected error occurred. Please try again.')
-    }
+      console.error(error);
+      setError('An unexpected error occurred. Please try again.');
+   }
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

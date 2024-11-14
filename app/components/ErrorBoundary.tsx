@@ -17,9 +17,10 @@ class ErrorBoundary extends React.Component<Props, State> {
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(_: Error): State {
+  static getDerivedStateFromError(): State {
     return { hasError: true }
   }
+  
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.log({ error, errorInfo })
