@@ -3,7 +3,7 @@ import { prisma } from '@/app/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { v2 as cloudinary } from 'cloudinary'
 
-// Remove the import of `authOptions`
+// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -92,7 +92,7 @@ export async function GET(req: Request) {
           { company: { contains: search, mode: 'insensitive' } },
           { dealer: { contains: search, mode: 'insensitive' } },
         ]
-      } : {}),
+      } : {}), // Only apply search filters if search term exists
     }
 
     // Fetch cars with pagination
