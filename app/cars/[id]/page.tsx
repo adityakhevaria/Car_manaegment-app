@@ -1,13 +1,13 @@
-// app/cars/[id]/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
+import { Car } from '@/types/car' // Import the Car type
 
 export default function CarDetail() {
   const params = useParams()
-  const [car, setCar] = useState<any>(null)
+  const [car, setCar] = useState<Car | null>(null) // Use the Car type here
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -101,13 +101,13 @@ export default function CarDetail() {
         </form>
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-4">{car.title}</h1>
-          <p className="mb-4">{car.description}</p>
-          <p>Type: {car.carType}</p>
-          <p>Company: {car.company}</p>
-          <p>Dealer: {car.dealer}</p>
+          <h1 className="text-2xl font-bold mb-4">{car?.title}</h1>
+          <p className="mb-4">{car?.description}</p>
+          <p>Type: {car?.carType}</p>
+          <p>Company: {car?.company}</p>
+          <p>Dealer: {car?.dealer}</p>
           <div className="grid grid-cols-2 gap-4 my-4">
-            {car.images.map((image: string, index: number) => (
+            {car?.images.map((image: string, index: number) => (
               <Image key={index} src={image} alt={`Car image ${index + 1}`} width={300} height={200} className="rounded" />
             ))}
           </div>
