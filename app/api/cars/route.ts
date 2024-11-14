@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/app/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { v2 as cloudinary } from 'cloudinary'
-import { authOptions } from '../auth/[...nextauth]/route'
 
+// Remove the import of `authOptions`
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -19,8 +19,9 @@ interface CarData {
   dealer: string
 }
 
+// Update GET and POST handlers
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession()  // No need for authOptions here
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession()  // Use getServerSession directly without importing authOptions
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
@@ -85,7 +86,7 @@ export async function GET(req: Request) {
           { company: { contains: search, mode: 'insensitive' } },
           { dealer: { contains: search, mode: 'insensitive' } },
         ]
-      } : {})
+      } : {}),
     }
 
     const [cars, totalCount] = await Promise.all([
