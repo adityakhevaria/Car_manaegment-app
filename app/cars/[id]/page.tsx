@@ -2,10 +2,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Image from 'next/image'
 
-export default function CarDetail({ params }: { params: { id: string } }) {
+export default function CarDetail() {
+  const params = useParams()
   const [car, setCar] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState('')
@@ -14,11 +15,9 @@ export default function CarDetail({ params }: { params: { id: string } }) {
   const [company, setCompany] = useState('')
   const [dealer, setDealer] = useState('')
   const router = useRouter()
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchCar()
-  }, [])
-
+  // Define fetchCar outside of useEffect so it can be reused
   const fetchCar = async () => {
     const response = await fetch(`/api/cars/${params.id}`)
     if (response.ok) {
@@ -29,8 +28,13 @@ export default function CarDetail({ params }: { params: { id: string } }) {
       setCarType(data.car.carType)
       setCompany(data.car.company)
       setDealer(data.car.dealer)
+      setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchCar() // Call fetchCar on component mount
+  }, [params.id]) // dependency on params.id ensures it runs only when the ID changes
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +46,8 @@ export default function CarDetail({ params }: { params: { id: string } }) {
 
     if (response.ok) {
       setIsEditing(false)
-      fetchCar()
+      setLoading(true) // Set loading before refetching to avoid UI flickers
+      await fetchCar() // Fetch updated data
     }
   }
 
@@ -56,7 +61,7 @@ export default function CarDetail({ params }: { params: { id: string } }) {
     }
   }
 
-  if (!car) return <div>Loading...</div>
+  if (loading) return <div>Loading...</div>
 
   return (
     <div className="max-w-2xl mx-auto">

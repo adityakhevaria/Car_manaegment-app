@@ -1,8 +1,13 @@
-// app/cars/new/page.tsx
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { AlertCircle } from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function NewCar() {
   const [title, setTitle] = useState('')
@@ -11,21 +16,34 @@ export default function NewCar() {
   const [carType, setCarType] = useState('')
   const [company, setCompany] = useState('')
   const [dealer, setDealer] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const response = await fetch('/api/cars', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description, images, carType, company, dealer }),
-    })
+    setError(null)
+    try {
+      const response = await fetch('/api/cars', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, images, carType, company, dealer }),
+      })
 
-    if (response.ok) {
-      router.push('/cars')
-    } else {
-      const data = await response.json()
-      console.error(data.error)
+      if (response.ok) {
+        router.push('/cars')
+      } else {
+        const errorData = await response.text()
+        let errorMessage
+        try {
+          const jsonError = JSON.parse(errorData)
+          errorMessage = jsonError.error || 'An error occurred while adding the car.'
+        } catch {
+          errorMessage = errorData || 'An error occurred while adding the car.'
+        }
+        setError(errorMessage)
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.')
     }
   }
 
@@ -43,69 +61,74 @@ export default function NewCar() {
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Add New Car</h1>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1">Title</label>
-          <input
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full p-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">Description</label>
-          <textarea
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
-            className="w-full p-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">Images (up to 10)</label>
-          <input
+          <Label htmlFor="images">Images (up to 10)</Label>
+          <Input
+            id="images"
             type="file"
             accept="image/*"
             multiple
             onChange={handleImageUpload}
-            className="w-full p-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">Car Type</label>
-          <input
+          <Label htmlFor="carType">Car Type</Label>
+          <Input
+            id="carType"
             type="text"
             value={carType}
             onChange={(e) => setCarType(e.target.value)}
             required
-            className="w-full p-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">Company</label>
-          <input
+          <Label htmlFor="company">Company</Label>
+          <Input
+            id="company"
             type="text"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             required
-            className="w-full p-2 border rounded"
           />
         </div>
         <div>
-          <label className="block mb-1">Dealer</label>
-          <input
+          <Label htmlFor="dealer">Dealer</Label>
+          <Input
+            id="dealer"
             type="text"
             value={dealer}
             onChange={(e) => setDealer(e.target.value)}
             required
-            className="w-full p-2 border rounded"
           />
         </div>
-        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-          Add Car
-        </button>
+        <Button type="submit" className="w-full">Add Car</Button>
       </form>
     </div>
   )

@@ -3,16 +3,26 @@
 
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
+import { useEffect, useState } from 'react'
 
 export default function Navbar() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <nav className="bg-gray-800 text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl font-bold">Car Management</Link>
         <div>
-          {session ? (
+          {status === 'authenticated' ? (
             <>
               <Link href="/cars" className="mr-4">My Cars</Link>
               <Link href="/cars/new" className="mr-4">Add Car</Link>

@@ -1,7 +1,6 @@
-// app/login/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -9,6 +8,10 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
+
+  useEffect(() => {
+    // Any client-side-only code goes here
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
